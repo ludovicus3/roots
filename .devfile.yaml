@@ -1,0 +1,69 @@
+schemaVersion: 2.2.0
+metadata:
+  name: roots
+components:
+  - name: tools
+    container:
+      env:
+        - name: SKIP_TEST_DATABASE
+          value: 'true'
+        - name: POSTGRES_USER
+          value: '{{postgresUser}}'
+        - name: POSTGRES_PASSWORD
+          value: '{{postgresPassword}}'
+        - name: POSTGRES_DB
+          value: '{{postgresDb}}'
+      endpoints:
+        - exposure: public
+          name: web
+          protocol: http
+          targetPort: 3000
+      image: quay.io/ludovicus/rails-developer-image:bookworm-latest
+      memoryLimit: 2G
+      mountSources: true
+  - name: postgres
+    container:
+      endpoints:
+        - exposure: none
+          name: postgresql
+          targetPort: 5432
+      env:
+        - name: POSTGRES_USER
+          value: '{{postgresUser}}'
+        - name: POSTGRES_PASSWORD
+          value: '{{postgresPassword}}'
+        - name: POSTGRES_DB
+          value: '{{postgresDb}}'
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+      image: postgres:{{postgresVersion}}
+      volumeMounts:
+        - name: data
+          path: /var/lib/postgresql/data
+  - name: data
+    volume:
+      size: 2Gi
+commands:
+  - id: bundle-config
+    exec:
+      component: tools
+      commandLine: >-
+        bundle config set --local clean true && \
+        bundle config set --local path vendor && \
+        bundle config set --local jobs 5 && \
+        bundle config set --local retry 3 && \
+        bundle install && \
+        bundle binstubs --all && \
+        bundle binstubs bundler --force
+      workingDir: ${PROJECT_SOURCE}
+  - id: run
+    exec:
+      component: tools
+      commandLine: bin/dev
+      workingDir: ${PROJECT_SOURCE}
+variables:
+  postgresVersion: "15"
+  postgresDb: roots
+  postgresUser: roots
+  postgresPassword: dasiltuagbkadsh
+
