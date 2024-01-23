@@ -16,7 +16,7 @@ components:
       endpoints:
         - exposure: public
           name: web
-          protocol: http
+          protocol: https
           targetPort: 3000
       image: quay.io/ludovicus/rails-developer-image:bookworm-latest
       memoryLimit: 2G
@@ -43,24 +43,6 @@ components:
   - name: data
     volume:
       size: 2Gi
-commands:
-  - id: bundle-config
-    exec:
-      component: tools
-      commandLine: >-
-        bundle config set --local clean true && \
-        bundle config set --local path vendor && \
-        bundle config set --local jobs 5 && \
-        bundle config set --local retry 3 && \
-        bundle install && \
-        bundle binstubs --all && \
-        bundle binstubs bundler --force
-      workingDir: ${PROJECT_SOURCE}
-  - id: run
-    exec:
-      component: tools
-      commandLine: bin/dev
-      workingDir: ${PROJECT_SOURCE}
 variables:
   postgresVersion: "15"
   postgresDb: roots
