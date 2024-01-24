@@ -13,6 +13,8 @@ components:
           value: '{{postgresPassword}}'
         - name: POSTGRES_DB
           value: '{{postgresDb}}'
+        - name: REDIS_URL
+          value: redis://localhost:6379/0
       endpoints:
         - exposure: public
           name: web
@@ -21,6 +23,21 @@ components:
       image: quay.io/ludovicus/rails-developer-image:bookworm-latest
       memoryLimit: 2G
       mountSources: true
+  - name: redis
+    container:
+      endpoints:
+        - exposure: none
+          name: redis
+          targetPort: 6379
+      image: redis:{{redisTag}}
+      command:
+        - redis-server
+      args:
+        - '--appendonly'
+        - 'yes'
+      volumeMounts:
+        - name: cache
+          path: /data
   - name: postgres
     container:
       endpoints:
@@ -43,9 +60,13 @@ components:
   - name: data
     volume:
       size: 2Gi
+  - name: cache
+    volume:
+      size: 1Gi
 variables:
   postgresVersion: "15"
   postgresDb: roots
   postgresUser: roots
   postgresPassword: dasiltuagbkadsh
+  redisTag: latest
 
