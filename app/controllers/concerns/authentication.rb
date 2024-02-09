@@ -10,7 +10,4 @@ module Authentication
   def require_login
     authenticate
   end
-
-  private
-
 end

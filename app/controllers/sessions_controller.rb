@@ -3,6 +3,9 @@ class SessionsController < ApplicationController
   after_action :update_activity_time, only: :create
 
   def new
+    if session[:user_id]
+      redirect_to root_path
+    end
   end
 
   def create

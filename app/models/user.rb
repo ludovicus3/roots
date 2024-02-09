@@ -1,8 +1,11 @@
 class User < ApplicationRecord
-  validates :email, presence: true
-  validates :email, uniqueness: true
-
   def self.find_or_create_by_omniauth(auth)
-    self.find_or_create_by(email: auth["info"]["email"])
+    find_or_create_by(uid: auth['uid'], provider: auth['provider']) do |user|
+      user.email = auth['info']['email']
+    end
+  end
+
+  def self.current
+    @current ||= User.find(session[:user_id]) if session[:user_id]
   end
 end
